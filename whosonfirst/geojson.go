@@ -1,10 +1,10 @@
 package geojson
 
 import (
-	"github.com/jeffail/gabs"
+	_ "fmt"
 	"github.com/dhconnelly/rtreego"
+	"github.com/jeffail/gabs"
 	"io/ioutil"
-	"fmt"
 )
 
 /*
@@ -70,11 +70,11 @@ func (wof WOFFeature) Bounds() (*rtreego.Rect, error) {
 	pt := rtreego.Point{swlon, swlat}
 	rect, err := rtreego.NewRect(pt, []float64{llon, llat})
 
-     	if err != nil {
-     	   return nil, err
-     	}
+	if err != nil {
+		return nil, err
+	}
 
-     	return rect, nil
+	return rect, nil
 }
 
 func UnmarshalFile(path string) (*WOFFeature, error) {
