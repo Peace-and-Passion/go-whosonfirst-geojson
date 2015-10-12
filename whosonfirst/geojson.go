@@ -2,6 +2,7 @@ package geojson
 
 import (
 	"github.com/jeffail/gabs"
+	"github.com/dhconnelly/rtreego"
 	"io/ioutil"
 )
 
@@ -20,7 +21,7 @@ type WOFProperties struct {
 type WOFFeature struct {
      ID          json.Number            `json:"id,omitempty"`
      Type        string                 `json:"type"`
-     BoundingBox []float64              `json:"bbox,omitempty"`
+     BoundingBox []float64              `json:"bbox,omitempty"`	// maybe make this a WOFBounds (rtree) like properties?
      Geometry    *gj.Geometry      `json:"geometry"`
      Properties  WOFProperties			`json:"properties"`
      // Properties  map[string]interface{} `json:"properties"`
@@ -39,6 +40,41 @@ func (wof WOFFeature) Body() *gabs.Container {
 
 func (wof WOFFeature) Dumps() string {
 	return wof.Parsed.String()
+}
+
+// See notes above in WOFFeature.BoundingBox - for now this will do...
+// (20151012/thisisaaronland)
+
+func (wof WOFFeature) Bounds() (*rtreego.Rect, error) {
+
+	body := wof.Body()
+
+	children, _ := body.S("bbox").Children()
+
+	var swlon float64
+	var swlat float64
+	var nelon float64
+	var nelat float64
+
+	swlon = children[0].Data().(float64)
+	swlat = children[1].Data().(float64)
+	nelon = children[2].Data().(float64)
+	nelat = children[3].Data().(float64)
+
+	// THIS DOES NOT ACCOUNT FOR NEGATIVE VALUES YET
+	// (20151012/thisisaaronland)
+
+	llat := nelat - swlat
+	llon := nelon - swlon
+
+	pt := rtreego.Point{swlon, swlat}
+	rect, err := rtreego.NewRect(pt, []float64{llon, llat})
+
+     	if err != nil {
+     	   return nil, err
+     	}
+
+     	return rect, nil
 }
 
 func UnmarshalFile(path string) (*WOFFeature, error) {
