@@ -1,11 +1,19 @@
 package geojson
 
 import (
-	_ "fmt"
+	_"fmt"
 	"github.com/dhconnelly/rtreego"
 	"github.com/jeffail/gabs"
 	"io/ioutil"
 )
+
+// See also
+// https://github.com/dhconnelly/rtreego#storing-updating-and-deleting-objects
+
+type WOFBounds struct {
+     where *rtreego.Rect
+     Id int
+}
 
 /*
 Something like this using "github.com/paulmach/go.geojson" seems
@@ -43,18 +51,31 @@ func (wof WOFFeature) Dumps() string {
 	return wof.Parsed.String()
 }
 
+func (wof WOFFeature) Id() int {
+
+	body := wof.Body()
+
+	var flid float64
+	flid = body.Path("properties.wof:id").Data().(float64)
+
+	id := int(flid)
+	return id
+}
+
 // See notes above in WOFFeature.BoundingBox - for now this will do...
 // (20151012/thisisaaronland)
 
-func (wof WOFFeature) Bounds() (*rtreego.Rect, error) {
+func (wof WOFFeature) Bounds() (*WOFBounds, error) {
 
+	id := wof.Id()
 	body := wof.Body()
-	children, _ := body.S("bbox").Children()
 
 	var swlon float64
 	var swlat float64
 	var nelon float64
 	var nelat float64
+
+	children, _ := body.S("bbox").Children()
 
 	swlon = children[0].Data().(float64)
 	swlat = children[1].Data().(float64)
@@ -74,7 +95,7 @@ func (wof WOFFeature) Bounds() (*rtreego.Rect, error) {
 		return nil, err
 	}
 
-	return rect, nil
+	return &WOFBounds{rect, id}, nil
 }
 
 func UnmarshalFile(path string) (*WOFFeature, error) {

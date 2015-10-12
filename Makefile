@@ -4,7 +4,7 @@ prep:
 self:   prep
 	if test -d src/github.com/whosonfirst/go-whosonfirst-geojson; then rm -rf src/github.com/whosonfirst/go-whosonfirst-geojson; fi
 	mkdir -p src/github.com/whosonfirst/go-whosonfirst-geojson
-	cp -r whosonfirst src/github.com/whosonfirst/go-whosonfirst-geojson/whosonfirst
+	cp geojson.go src/github.com/whosonfirst/go-whosonfirst-geojson/geojson.go
 
 deps:   self
 	go get -u "github.com/jeffail/gabs"

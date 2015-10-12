@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	geojson "github.com/whosonfirst/go-whosonfirst-geojson/whosonfirst"
+	"github.com/whosonfirst/go-whosonfirst-geojson"
 )
 
 func main() {

@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	geojson "github.com/whosonfirst/go-whosonfirst-geojson/whosonfirst"
+	geojson "github.com/whosonfirst/go-whosonfirst-geojson"
 )
 
 func main() {
@@ -19,8 +19,8 @@ func main() {
 			panic(parse_err)
 		}
 
-		rect, _ := f.Bounds()
-		fmt.Printf("%v", rect)
+		bounds, _ := f.Bounds()
+		fmt.Printf("%s", bounds.Id)
 	}
 
 }
