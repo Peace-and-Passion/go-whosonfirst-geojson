@@ -4,6 +4,7 @@ import (
 	"github.com/jeffail/gabs"
 	"github.com/dhconnelly/rtreego"
 	"io/ioutil"
+	"fmt"
 )
 
 /*
@@ -48,7 +49,6 @@ func (wof WOFFeature) Dumps() string {
 func (wof WOFFeature) Bounds() (*rtreego.Rect, error) {
 
 	body := wof.Body()
-
 	children, _ := body.S("bbox").Children()
 
 	var swlon float64
@@ -61,11 +61,11 @@ func (wof WOFFeature) Bounds() (*rtreego.Rect, error) {
 	nelon = children[2].Data().(float64)
 	nelat = children[3].Data().(float64)
 
-	// THIS DOES NOT ACCOUNT FOR NEGATIVE VALUES YET
-	// (20151012/thisisaaronland)
-
 	llat := nelat - swlat
 	llon := nelon - swlon
+
+	// fmt.Printf("%f - %f = %f\n", nelat, swlat, llat)
+	// fmt.Printf("%f - %f = %f\n", nelon, swlon, llon)
 
 	pt := rtreego.Point{swlon, swlat}
 	rect, err := rtreego.NewRect(pt, []float64{llon, llat})
