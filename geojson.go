@@ -15,6 +15,10 @@ type WOFBounds struct {
      Id int
 }
 
+func (b WOFBounds) Bounds() *rtreego.Rect {
+     return b.where
+}
+
 /*
 Something like this using "github.com/paulmach/go.geojson" seems
 like it would be a good thing but I don't think I have the stamina
