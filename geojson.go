@@ -13,6 +13,7 @@ import (
 type WOFBounds struct {
      where *rtreego.Rect
      Id int
+     Placetype string
 }
 
 func (b WOFBounds) Bounds() *rtreego.Rect {
@@ -66,12 +67,27 @@ func (wof WOFFeature) Id() int {
 	return id
 }
 
+// Should return a full-on WOFPlacetype object thing-y
+// (20151012/thisisaaronland)
+
+func (wof WOFFeature) Placetype() placetype {
+
+	body := wof.Body()
+
+	var placetype string
+	placetype = body.Path("properties.wof:placetype").Data().(string)
+
+	return placetype
+}
+
 // See notes above in WOFFeature.BoundingBox - for now this will do...
 // (20151012/thisisaaronland)
 
 func (wof WOFFeature) Bounds() (*WOFBounds, error) {
 
 	id := wof.Id()
+	placetype = wof.Placetype()
+
 	body := wof.Body()
 
 	var swlon float64
@@ -99,7 +115,7 @@ func (wof WOFFeature) Bounds() (*WOFBounds, error) {
 		return nil, err
 	}
 
-	return &WOFBounds{rect, id}, nil
+	return &WOFBounds{rect, id, placetype}, nil
 }
 
 func UnmarshalFile(path string) (*WOFFeature, error) {
