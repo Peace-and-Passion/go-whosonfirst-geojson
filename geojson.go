@@ -86,7 +86,7 @@ func (wof WOFFeature) Placetype() string {
 func (wof WOFFeature) Bounds() (*WOFBounds, error) {
 
 	id := wof.Id()
-	placetype = wof.Placetype()
+	placetype := wof.Placetype()
 
 	body := wof.Body()
 
