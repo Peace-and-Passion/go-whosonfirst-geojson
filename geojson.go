@@ -10,23 +10,15 @@ import (
 // See also
 // https://github.com/dhconnelly/rtreego#storing-updating-and-deleting-objects
 
-type WOFSpatial struct {
-     where *rtreego.Rect
-     id int
-     name string
-     placetype string
+type WOFRTree struct {
+     bounds *rtreego.Rect
+     Id int
+     Name string
+     Placetype string
 }
 
-func (sp WOFSpatial) Id() int {
-     return sp.id
-}
-
-func (sp WOFSpatial) Name() string {
-     return sp.name
-}
-
-func (sp WOFSpatial) Bounds() *rtreego.Rect {
-     return sp.where
+func (sp WOFRTree) Bounds() *rtreego.Rect {
+     return sp.bounds
 }
 
 /*
@@ -102,7 +94,7 @@ func (wof WOFFeature) Placetype() string {
 // See notes above in WOFFeature.BoundingBox - for now this will do...
 // (20151012/thisisaaronland)
 
-func (wof WOFFeature) Bounds() (*WOFSpatial, error) {
+func (wof WOFFeature) Bounds() (*WOFRTree, error) {
 
 	id := wof.Id()
 	name := wof.Name()
@@ -135,7 +127,7 @@ func (wof WOFFeature) Bounds() (*WOFSpatial, error) {
 		return nil, err
 	}
 
-	return &WOFSpatial{rect, id, name, placetype}, nil
+	return &WOFRTree{rect, id, name, placetype}, nil
 }
 
 func UnmarshalFile(path string) (*WOFFeature, error) {
