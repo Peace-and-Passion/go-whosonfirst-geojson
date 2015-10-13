@@ -10,14 +10,23 @@ import (
 // See also
 // https://github.com/dhconnelly/rtreego#storing-updating-and-deleting-objects
 
-type WOFBounds struct {
+type WOFSpatial struct {
      where *rtreego.Rect
-     Id int
-     Placetype string
+     id int
+     name string
+     placetype string
 }
 
-func (b WOFBounds) Bounds() *rtreego.Rect {
-     return b.where
+func (sp WOFSpatial) Id() int {
+     return sp.id
+}
+
+func (sp WOFSpatial) Name() string {
+     return sp.name
+}
+
+func (sp WOFSpatial) Bounds() *rtreego.Rect {
+     return sp.where
 }
 
 /*
@@ -67,6 +76,16 @@ func (wof WOFFeature) Id() int {
 	return id
 }
 
+func (wof WOFFeature) Name() string {
+
+	body := wof.Body()
+
+	var name string
+	name = body.Path("properties.wof:name").Data().(string)
+
+	return name
+}
+
 // Should return a full-on WOFPlacetype object thing-y
 // (20151012/thisisaaronland)
 
@@ -83,9 +102,10 @@ func (wof WOFFeature) Placetype() string {
 // See notes above in WOFFeature.BoundingBox - for now this will do...
 // (20151012/thisisaaronland)
 
-func (wof WOFFeature) Bounds() (*WOFBounds, error) {
+func (wof WOFFeature) Bounds() (*WOFSpatial, error) {
 
 	id := wof.Id()
+	name := wof.Name()
 	placetype := wof.Placetype()
 
 	body := wof.Body()
@@ -115,7 +135,7 @@ func (wof WOFFeature) Bounds() (*WOFBounds, error) {
 		return nil, err
 	}
 
-	return &WOFBounds{rect, id, placetype}, nil
+	return &WOFSpatial{rect, id, name, placetype}, nil
 }
 
 func UnmarshalFile(path string) (*WOFFeature, error) {
