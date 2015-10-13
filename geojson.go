@@ -7,6 +7,14 @@ import (
 	"io/ioutil"
 )
 
+type WOFError struct {
+    s string
+}
+
+func (e *WOFError) Error() string {
+    return e.s
+}
+
 // See also
 // https://github.com/dhconnelly/rtreego#storing-updating-and-deleting-objects
 
@@ -62,9 +70,25 @@ func (wof WOFFeature) Id() int {
 	body := wof.Body()
 
 	var flid float64
-	flid = body.Path("properties.wof:id").Data().(float64)
+	var id int
 
-	id := int(flid)
+	var ok bool
+
+	// what follows shouldn't be necessary but appears to be
+	// for... uh, reasons (20151013/thisisaaronland)
+
+	flid, ok = body.Path("properties.wof:id").Data().(float64)
+
+	if ok {
+	   id = int(flid)
+        }  else {
+	   id, ok = body.Path("properties.wof:id").Data().(int)	
+	}   
+
+	if ! ok {
+	   id = -1
+	}
+
 	return id
 }
 
@@ -73,7 +97,13 @@ func (wof WOFFeature) Name() string {
 	body := wof.Body()
 
 	var name string
-	name = body.Path("properties.wof:name").Data().(string)
+	var ok bool
+
+	name, ok = body.Path("properties.wof:name").Data().(string)
+
+	if ! ok {
+	   name = ""
+	}
 
 	return name
 }
@@ -86,7 +116,13 @@ func (wof WOFFeature) Placetype() string {
 	body := wof.Body()
 
 	var placetype string
-	placetype = body.Path("properties.wof:placetype").Data().(string)
+	var ok bool
+
+	placetype, ok = body.Path("properties.wof:placetype").Data().(string)
+
+	if ! ok {
+	   placetype = "unknown"
+	}
 
 	return placetype
 }
@@ -108,6 +144,10 @@ func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 	var nelat float64
 
 	children, _ := body.S("bbox").Children()
+
+	if len(children) != 4 {
+	   return nil, &WOFError{"weird and freaky bounding box"}
+	}
 
 	swlon = children[0].Data().(float64)
 	swlat = children[1].Data().(float64)
