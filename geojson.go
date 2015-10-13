@@ -70,7 +70,7 @@ func (wof WOFFeature) Id() int {
 // Should return a full-on WOFPlacetype object thing-y
 // (20151012/thisisaaronland)
 
-func (wof WOFFeature) Placetype() placetype {
+func (wof WOFFeature) Placetype() string {
 
 	body := wof.Body()
 
