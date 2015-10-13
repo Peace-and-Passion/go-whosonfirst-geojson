@@ -19,8 +19,9 @@ func main() {
 			panic(parse_err)
 		}
 
-		bounds, _ := f.Bounds()
-		fmt.Printf("%s", bounds.Id)
+		sp, _ := f.EnSpatialize()
+		fmt.Printf("%v\n", sp)
+		fmt.Printf("%d\n", sp.Id)
 	}
 
 }
