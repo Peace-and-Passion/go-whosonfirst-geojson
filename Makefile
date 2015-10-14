@@ -11,8 +11,8 @@ deps:   self
 	go get -u "github.com/dhconnelly/rtreego"
 	go get -u "github.com/kellydunn/golang-geo"
 fmt:
-	go fmt bin/dump.go
-	go fmt whosonfirst/geojson.go
+	go fmt bin/*.go
+	go fmt *.go
 
 dump:	self
 	go build -o bin/dump bin/dump.go

@@ -3,10 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	geojson "github.com/whosonfirst/go-whosonfirst-geojson"
 	"github.com/kellydunn/golang-geo"
+	geojson "github.com/whosonfirst/go-whosonfirst-geojson"
 )
-
 
 func main() {
 
@@ -29,8 +28,8 @@ func main() {
 
 		for _, poly := range polygons {
 
-		    c := poly.Contains(pt)
-		    fmt.Printf("contained: %v\n", c)
+			c := poly.Contains(pt)
+			fmt.Printf("contained: %v\n", c)
 		}
 	}
 
