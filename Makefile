@@ -9,7 +9,7 @@ self:   prep
 deps:   self
 	go get -u "github.com/jeffail/gabs"
 	go get -u "github.com/dhconnelly/rtreego"
-
+	go get -u "github.com/kellydunn/golang-geo"
 fmt:
 	go fmt bin/dump.go
 	go fmt whosonfirst/geojson.go

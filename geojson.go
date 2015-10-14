@@ -1,8 +1,9 @@
 package geojson
 
 import (
-	_"fmt"
+	_ "fmt"
 	"github.com/dhconnelly/rtreego"
+	"github.com/kellydunn/golang-geo"
 	"github.com/jeffail/gabs"
 	"io/ioutil"
 )
@@ -29,29 +30,6 @@ func (sp WOFSpatial) Bounds() *rtreego.Rect {
      return sp.bounds
 }
 
-/*
-Something like this using "github.com/paulmach/go.geojson" seems
-like it would be a good thing but I don't think I have the stamina
-to figure out how to parse the properties separately right now...
-(20151005/thisisaaronland)
-/*
-
-type WOFProperties struct {
-     Raw    []byte
-     Parsed *gabs.Container
-}
-
-type WOFFeature struct {
-     ID          json.Number            `json:"id,omitempty"`
-     Type        string                 `json:"type"`
-     BoundingBox []float64              `json:"bbox,omitempty"`	// maybe make this a WOFBounds (rtree) like properties?
-     Geometry    *gj.Geometry      `json:"geometry"`
-     Properties  WOFProperties			`json:"properties"`
-     // Properties  map[string]interface{} `json:"properties"`
-     CRS         map[string]interface{} `json:"crs,omitempty"` // Coordinate Reference System Objects are not currently supported
-}
-*/
-
 type WOFFeature struct {
 	Raw    []byte
 	Parsed *gabs.Container
@@ -65,7 +43,7 @@ func (wof WOFFeature) Dumps() string {
 	return wof.Parsed.String()
 }
 
-func (wof WOFFeature) Id() int {
+func (wof WOFFeature) WOFId() int {
 
 	body := wof.Body()
 
@@ -92,7 +70,7 @@ func (wof WOFFeature) Id() int {
 	return id
 }
 
-func (wof WOFFeature) Name() string {
+func (wof WOFFeature) WOFName() string {
 
 	body := wof.Body()
 
@@ -111,7 +89,7 @@ func (wof WOFFeature) Name() string {
 // Should return a full-on WOFPlacetype object thing-y
 // (20151012/thisisaaronland)
 
-func (wof WOFFeature) Placetype() string {
+func (wof WOFFeature) WOFPlacetype() string {
 
 	body := wof.Body()
 
@@ -127,14 +105,11 @@ func (wof WOFFeature) Placetype() string {
 	return placetype
 }
 
-// See notes above in WOFFeature.BoundingBox - for now this will do...
-// (20151012/thisisaaronland)
-
 func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 
-	id := wof.Id()
-	name := wof.Name()
-	placetype := wof.Placetype()
+	id := wof.WOFId()
+	name := wof.WOFName()
+	placetype := wof.WOFPlacetype()
 
 	body := wof.Body()
 
@@ -168,6 +143,90 @@ func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 	}
 
 	return &WOFSpatial{rect, id, name, placetype}, nil
+}
+
+func (wof WOFFeature) GeomToPolygons () []geo.Polygon {
+
+     body := wof.Body()
+
+     var geom_type string
+
+     geom_type, _ = body.Path("geometry.type").Data().(string)
+     children, _ := body.S("geometry").ChildrenMap()
+
+     polygons := make([]geo.Polygon, 0)
+
+     for key, child := range children {
+
+	    if key != "coordinates" {
+	       continue
+	    }
+
+	    var coordinates []interface{}
+	    coordinates, _ = child.Data().([]interface{})
+
+	    if geom_type == "Polygon" {
+	       polygons = wof.DumpPolygon(coordinates)
+	    } else if geom_type == "MultiPolygon" {
+	        polygons = wof.DumpMultiPolygon(coordinates)
+	    } else {
+	      // pass
+	    }
+     }
+
+     return polygons
+}
+
+func (wof WOFFeature) DumpMultiPolygon (coordinates []interface{}) []geo.Polygon {
+
+	polygons := make([]geo.Polygon, 0)
+
+    	for _, ipolys := range coordinates {
+
+	   polys := ipolys.([]interface{})
+
+	   for _, ipoly := range polys {
+
+		   poly := ipoly.([]interface{})
+		   polygon := wof.DumpCoords(poly)
+		   polygons = append(polygons, polygon)
+	   }
+
+       }
+
+	return polygons
+}
+
+func (wof WOFFeature) DumpPolygon (coordinates []interface{}) []geo.Polygon {
+
+	polygons := make([]geo.Polygon, 0)
+
+    	for _, ipoly := range coordinates {
+
+	   poly := ipoly.([]interface{})
+	   polygon := wof.DumpCoords(poly)
+	   polygons = append(polygons, polygon)
+	}
+
+	return polygons
+}
+
+func (wof WOFFeature) DumpCoords (poly []interface{}) geo.Polygon {
+
+	   polygon := geo.Polygon{}
+
+	   for _, icoords := range poly {
+
+	   	coords := icoords.([]interface{})
+
+		lon := coords[0].(float64)
+		lat := coords[1].(float64)
+
+		pt := geo.NewPoint(lat, lon)
+		polygon.Add(pt)
+	   }
+
+	   return polygon
 }
 
 func UnmarshalFile(path string) (*WOFFeature, error) {
