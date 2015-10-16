@@ -39,7 +39,7 @@ func (sp WOFSpatial) Bounds() *rtreego.Rect {
 }
 
 type WOFFeature struct {
-	Raw    []byte
+	// Raw    []byte
 	Parsed *gabs.Container
 }
 
@@ -153,7 +153,7 @@ func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 	return &WOFSpatial{rect, id, name, placetype}, nil
 }
 
-func (wof WOFFeature) GeomToPolygons() []geo.Polygon {
+func (wof WOFFeature) GeomToPolygons() []*geo.Polygon {
 
 	body := wof.Body()
 
@@ -162,7 +162,7 @@ func (wof WOFFeature) GeomToPolygons() []geo.Polygon {
 	geom_type, _ = body.Path("geometry.type").Data().(string)
 	children, _ := body.S("geometry").ChildrenMap()
 
-	polygons := make([]geo.Polygon, 0)
+	polygons := make([]*geo.Polygon, 0)
 
 	for key, child := range children {
 
@@ -185,9 +185,9 @@ func (wof WOFFeature) GeomToPolygons() []geo.Polygon {
 	return polygons
 }
 
-func (wof WOFFeature) DumpMultiPolygon(coordinates []interface{}) []geo.Polygon {
+func (wof WOFFeature) DumpMultiPolygon(coordinates []interface{}) []*geo.Polygon {
 
-	polygons := make([]geo.Polygon, 0)
+	polygons := make([]*geo.Polygon, 0)
 
 	for _, ipolys := range coordinates {
 
@@ -205,9 +205,9 @@ func (wof WOFFeature) DumpMultiPolygon(coordinates []interface{}) []geo.Polygon 
 	return polygons
 }
 
-func (wof WOFFeature) DumpPolygon(coordinates []interface{}) []geo.Polygon {
+func (wof WOFFeature) DumpPolygon(coordinates []interface{}) []*geo.Polygon {
 
-	polygons := make([]geo.Polygon, 0)
+	polygons := make([]*geo.Polygon, 0)
 
 	for _, ipoly := range coordinates {
 
@@ -219,9 +219,9 @@ func (wof WOFFeature) DumpPolygon(coordinates []interface{}) []geo.Polygon {
 	return polygons
 }
 
-func (wof WOFFeature) DumpCoords(poly []interface{}) geo.Polygon {
+func (wof WOFFeature) DumpCoords(poly []interface{}) *geo.Polygon {
 
-	polygon := geo.Polygon{}
+	polygon := &geo.Polygon{}
 
 	for _, icoords := range poly {
 
@@ -257,7 +257,7 @@ func UnmarshalFeature(raw []byte) (*WOFFeature, error) {
 	}
 
 	rsp := WOFFeature{
-		Raw:    raw,
+		// Raw:    raw,
 		Parsed: parsed,
 	}
 
