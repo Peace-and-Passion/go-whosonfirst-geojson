@@ -51,11 +51,28 @@ func (wof WOFFeature) Dumps() string {
 	return wof.Parsed.String()
 }
 
+func (wof WOFFeature) Id(path string) int {
+
+	return wof.id(path)
+}
+
+func (wof WOFFeature) Id() int {
+
+	path := "id"
+	return wof.id(path)
+}
+
 func (wof WOFFeature) WOFId() int {
+
+	path := "properties.wof:id"
+	return wof.id(path)
+}
+
+func (wof WOFFeature) id(path string) int {
 
 	body := wof.Body()
 
-	var flid float64
+	var id_float float64
 	var id int
 
 	var ok bool
@@ -63,12 +80,12 @@ func (wof WOFFeature) WOFId() int {
 	// what follows shouldn't be necessary but appears to be
 	// for... uh, reasons (20151013/thisisaaronland)
 
-	flid, ok = body.Path("properties.wof:id").Data().(float64)
+	id_float, ok = body.Path(path).Data().(float64)
 
 	if ok {
-		id = int(flid)
+		id = int(id_float)
 	} else {
-		id, ok = body.Path("properties.wof:id").Data().(int)
+		id, ok = body.Path(path).Data().(int)
 	}
 
 	if !ok {
@@ -78,33 +95,42 @@ func (wof WOFFeature) WOFId() int {
 	return id
 }
 
+func (wof WOFFeature) Name(path string) string {
+
+	return wof.name(path)
+}
+
 func (wof WOFFeature) WOFName() string {
 
-	body := wof.Body()
+	path := "properties.wof:name"
+	return wof.name(path)
+}
 
-	var name string
-	var ok bool
+func (wof WOFFeature) name(path string) string {
 
-	name, ok = body.Path("properties.wof:name").Data().(string)
+	name, ok := wof.StringValue(path)
 
 	if !ok {
-		name = ""
+		name = "A Place With No Name"
 	}
 
 	return name
 }
 
-// Should return a full-on WOFPlacetype object thing-y
-// (20151012/thisisaaronland)
+func (wof WOFFeature) Placetype(path string) string {
+
+	return wof.placetype(path)
+}
 
 func (wof WOFFeature) WOFPlacetype() string {
 
-	body := wof.Body()
+	path := "properties.wof:placetype"
+	return wof.placetype(path)
+}
 
-	var placetype string
-	var ok bool
+func (wof WOFFeature) placetype(path string) string {
 
-	placetype, ok = body.Path("properties.wof:placetype").Data().(string)
+	placetype, ok := wof.StringValue(path)
 
 	if !ok {
 		placetype = "unknown"
@@ -113,11 +139,42 @@ func (wof WOFFeature) WOFPlacetype() string {
 	return placetype
 }
 
+func (wof WOFFeature) StringProperty(prop string) (string, bool) {
+
+	path := fmt.Sprintf("properties.%s", prop)
+	return wof.StringValue(path)
+}
+
+func (wof WOFFeature) StringValue(path string) (string, bool) {
+
+	body := wof.Body()
+
+	var value string
+	var ok bool
+
+	value, ok = body.Path(path).Data().(string)
+	return value, ok
+}
+
 func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 
 	id := wof.WOFId()
 	name := wof.WOFName()
 	placetype := wof.WOFPlacetype()
+
+	return wof.enspatialize(id, name, placetype)
+}
+
+func (wof WOFFeature) EnSpatialize(path_id string, path_name string, path_placetype string) (*WOFSpatial, error) {
+
+	id := wof.Id(path_id)
+	name := wof.Name(path_name)
+	placetype := wof.Placetype(path_placetype)
+
+	return wof.enspatialize(id, name, placetype)
+}
+
+func (wof WOFFeature) enspatialize(id int, name string, placetype string) (*WOFSpatial, error) {
 
 	body := wof.Body()
 
