@@ -16,3 +16,6 @@ fmt:
 
 dump:	self
 	go build -o bin/dump bin/dump.go
+
+pip:	self
+	go build -o bin/pip bin/pip.go

@@ -9,8 +9,20 @@ import (
 
 func main() {
 
+	/*
+		./bin/pip /usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson /usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson
+		/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson has this many polygons: 1
+		/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson polygon 1 has 3 interior rings
+		contained: false
+		/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson has this many polygons: 1
+		/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson polygon 1 has 0 interior rings
+		contained: true
+	*/
+
 	flag.Parse()
 	args := flag.Args()
+
+	pt := geo.NewPoint(45.523668, -73.600159)
 
 	for _, path := range args {
 
@@ -24,12 +36,12 @@ func main() {
 
 		fmt.Printf("%s has this many polygons: %d\n", path, len(polygons))
 
-		pt := geo.NewPoint(40.681, -73.986)
+		for i, poly := range polygons {
 
-		for _, poly := range polygons {
+			fmt.Printf("%s polygon %d has %d interior rings\n", path, (i + 1), len(poly.InteriorRings))
 
 			c := poly.Contains(pt)
-			fmt.Printf("contained: %v\n", c)
+			fmt.Printf("contained: %t\n", c)
 		}
 	}
 

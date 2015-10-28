@@ -1,10 +1,12 @@
 package geojson
 
 import (
+	"fmt"
 	rtreego "github.com/dhconnelly/rtreego"
 	gabs "github.com/jeffail/gabs"
 	geo "github.com/kellydunn/golang-geo"
 	ioutil "io/ioutil"
+	"sync"
 )
 
 /*
@@ -34,6 +36,44 @@ type WOFSpatial struct {
 	Placetype string
 }
 
+type WOFPolygon struct {
+	OuterRing     geo.Polygon
+	InteriorRings []geo.Polygon
+}
+
+func (p *WOFPolygon) Contains(pt *geo.Point) bool {
+
+	contains := false
+
+	if p.OuterRing.Contains(pt) {
+		contains = true
+	}
+
+	if contains && len(p.InteriorRings) > 0 {
+
+		wg := new(sync.WaitGroup)
+
+		for _, r := range p.InteriorRings {
+
+			wg.Add(1)
+
+			go func(poly geo.Polygon, point *geo.Point) {
+
+				defer wg.Done()
+
+				if poly.Contains(point) {
+					contains = false
+				}
+
+			}(r, pt)
+		}
+
+		wg.Wait()
+	}
+
+	return contains
+}
+
 func (sp WOFSpatial) Bounds() *rtreego.Rect {
 	return sp.bounds
 }
@@ -51,10 +91,12 @@ func (wof WOFFeature) Dumps() string {
 	return wof.Parsed.String()
 }
 
+/*
 func (wof WOFFeature) Id(path string) int {
 
 	return wof.id(path)
 }
+*/
 
 func (wof WOFFeature) Id() int {
 
@@ -165,6 +207,7 @@ func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 	return wof.enspatialize(id, name, placetype)
 }
 
+/*
 func (wof WOFFeature) EnSpatialize(path_id string, path_name string, path_placetype string) (*WOFSpatial, error) {
 
 	id := wof.Id(path_id)
@@ -173,6 +216,7 @@ func (wof WOFFeature) EnSpatialize(path_id string, path_name string, path_placet
 
 	return wof.enspatialize(id, name, placetype)
 }
+*/
 
 func (wof WOFFeature) enspatialize(id int, name string, placetype string) (*WOFSpatial, error) {
 
@@ -210,7 +254,7 @@ func (wof WOFFeature) enspatialize(id int, name string, placetype string) (*WOFS
 	return &WOFSpatial{rect, id, name, placetype}, nil
 }
 
-func (wof WOFFeature) GeomToPolygons() []geo.Polygon {
+func (wof WOFFeature) GeomToPolygons() []*WOFPolygon {
 
 	body := wof.Body()
 
@@ -219,7 +263,7 @@ func (wof WOFFeature) GeomToPolygons() []geo.Polygon {
 	geom_type, _ = body.Path("geometry.type").Data().(string)
 	children, _ := body.S("geometry").ChildrenMap()
 
-	polygons := make([]geo.Polygon, 0)
+	polygons := make([]*WOFPolygon, 0)
 
 	for key, child := range children {
 
@@ -231,7 +275,7 @@ func (wof WOFFeature) GeomToPolygons() []geo.Polygon {
 		coordinates, _ = child.Data().([]interface{})
 
 		if geom_type == "Polygon" {
-			polygons = wof.DumpPolygon(coordinates)
+			polygons = append(polygons, wof.DumpPolygon(coordinates))
 		} else if geom_type == "MultiPolygon" {
 			polygons = wof.DumpMultiPolygon(coordinates)
 		} else {
@@ -242,9 +286,9 @@ func (wof WOFFeature) GeomToPolygons() []geo.Polygon {
 	return polygons
 }
 
-func (wof WOFFeature) DumpMultiPolygon(coordinates []interface{}) []geo.Polygon {
+func (wof WOFFeature) DumpMultiPolygon(coordinates []interface{}) []*WOFPolygon {
 
-	polygons := make([]geo.Polygon, 0)
+	polygons := make([]*WOFPolygon, 0)
 
 	for _, ipolys := range coordinates {
 
@@ -253,7 +297,7 @@ func (wof WOFFeature) DumpMultiPolygon(coordinates []interface{}) []geo.Polygon 
 		for _, ipoly := range polys {
 
 			poly := ipoly.([]interface{})
-			polygon := wof.DumpCoords(poly)
+			polygon := wof.DumpPolygon(poly)
 			polygons = append(polygons, polygon)
 		}
 
@@ -262,7 +306,7 @@ func (wof WOFFeature) DumpMultiPolygon(coordinates []interface{}) []geo.Polygon 
 	return polygons
 }
 
-func (wof WOFFeature) DumpPolygon(coordinates []interface{}) []geo.Polygon {
+func (wof WOFFeature) DumpPolygon(coordinates []interface{}) *WOFPolygon {
 
 	polygons := make([]geo.Polygon, 0)
 
@@ -273,7 +317,10 @@ func (wof WOFFeature) DumpPolygon(coordinates []interface{}) []geo.Polygon {
 		polygons = append(polygons, polygon)
 	}
 
-	return polygons
+	return &WOFPolygon{
+		OuterRing:     polygons[0],
+		InteriorRings: polygons[1:],
+	}
 }
 
 func (wof WOFFeature) DumpCoords(poly []interface{}) geo.Polygon {
