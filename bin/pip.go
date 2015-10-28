@@ -10,49 +10,49 @@ func main() {
 
 	/*
 
-	# ASSUMING
-        # lat := 45.523668
-        # lon := -73.600159
+			# ASSUMING
+		        # lat := 45.523668
+		        # lon := -73.600159
 
-	# PLAIN VANILLA POLYGON
+			# PLAIN VANILLA POLYGON
 
-	$> ./bin/pip /usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson /usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson
-	/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson has this many polygons: 1
-	/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson #1 has 3 interior rings
-	/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson #1 contains point false
-	/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson contains point: false
-	/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson f.Contains() point: false
-	---
-	/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson has this many polygons: 1
-	/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson #1 has 0 interior rings
-	/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson #1 contains point true
-	/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson contains point: true
-	/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson f.Contains() point: true
-	---
+			$> ./bin/pip /usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson /usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson
+			/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson has this many polygons: 1
+			/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson #1 has 3 interior rings
+			/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson #1 contains point false
+			/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson contains point: false
+			/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson f.Contains() point: false
+			---
+			/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson has this many polygons: 1
+			/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson #1 has 0 interior rings
+			/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson #1 contains point true
+			/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson contains point: true
+			/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson f.Contains() point: true
+			---
 
-	# MULTI POLYGON
+			# MULTI POLYGON
 
-	$> ./bin/pip /usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson has this many polygons: 8
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #1 has 0 interior rings
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #1 contains point false
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #2 has 0 interior rings
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #2 contains point false
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #3 has 0 interior rings
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #3 contains point false
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #4 has 0 interior rings
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #4 contains point true
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #5 has 0 interior rings
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #5 contains point false
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #6 has 0 interior rings
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #6 contains point false
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #7 has 0 interior rings
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #7 contains point false
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #8 has 0 interior rings
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #8 contains point false
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson contains point: true
-	/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson f.Contains() point: true
-	---
+			$> ./bin/pip /usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson has this many polygons: 8
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #1 has 0 interior rings
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #1 contains point false
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #2 has 0 interior rings
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #2 contains point false
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #3 has 0 interior rings
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #3 contains point false
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #4 has 0 interior rings
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #4 contains point true
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #5 has 0 interior rings
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #5 contains point false
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #6 has 0 interior rings
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #6 contains point false
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #7 has 0 interior rings
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #7 contains point false
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #8 has 0 interior rings
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #8 contains point false
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson contains point: true
+			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson f.Contains() point: true
+			---
 
 	*/
 

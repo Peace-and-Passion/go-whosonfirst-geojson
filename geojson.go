@@ -6,6 +6,7 @@ import (
 	gabs "github.com/jeffail/gabs"
 	geo "github.com/kellydunn/golang-geo"
 	ioutil "io/ioutil"
+	"strconv"
 	"sync"
 )
 
@@ -62,6 +63,14 @@ func (p *WOFPolygon) Contains(latitude float64, longitude float64) bool {
 
 				defer wg.Done()
 
+				/*
+
+					File under yak-shaving: Some way to send an intercept to poly.Contains
+					to stop the raycasting if any one of these goroutines gets the answer
+					it needs independent the results of the others. Like I said... yaks.
+					(20151028/thisisaaronland)
+				*/
+
 				if poly.Contains(point) {
 					contains = false
 				}
@@ -116,6 +125,7 @@ func (wof WOFFeature) id(path string) int {
 	body := wof.Body()
 
 	var id_float float64
+	var id_str string
 	var id int
 
 	var ok bool
@@ -129,6 +139,24 @@ func (wof WOFFeature) id(path string) int {
 		id = int(id_float)
 	} else {
 		id, ok = body.Path(path).Data().(int)
+	}
+
+	// But wait... there's more (20151028/thisisaaronland)
+
+	if !ok {
+
+		id_str, ok = body.Path(path).Data().(string)
+
+		if ok {
+
+			id_int, err := strconv.Atoi(id_str)
+
+			if err != nil {
+				ok = false
+			} else {
+				id = id_int
+			}
+		}
 	}
 
 	if !ok {

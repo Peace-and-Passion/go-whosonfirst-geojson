@@ -19,7 +19,9 @@ func main() {
 		}
 
 		fmt.Printf("# %s\n", path)
-		fmt.Println(f.Dumps())
+		// fmt.Println(f.Dumps())
+
+		fmt.Println(f.Id())
 	}
 
 }
