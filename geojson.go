@@ -41,8 +41,9 @@ type WOFPolygon struct {
 	InteriorRings []geo.Polygon
 }
 
-func (p *WOFPolygon) Contains(pt *geo.Point) bool {
+func (p *WOFPolygon) Contains(latitude float64, longitude float64) bool {
 
+	pt := geo.NewPoint(latitude, longitude)
 	contains := false
 
 	if p.OuterRing.Contains(pt) {
@@ -254,6 +255,33 @@ func (wof WOFFeature) enspatialize(id int, name string, placetype string) (*WOFS
 	return &WOFSpatial{rect, id, name, placetype}, nil
 }
 
+func (wof WOFFeature) Contains(latitude float64, longitude float64) bool {
+
+	polygons := wof.GeomToPolygons()
+	contains := false
+
+	wg := new(sync.WaitGroup)
+
+	for _, p := range polygons {
+
+		wg.Add(1)
+
+		go func(poly *WOFPolygon, lat float64, lon float64) {
+
+			defer wg.Done()
+
+			if poly.Contains(lat, lon) {
+				contains = true
+			}
+
+		}(p, latitude, longitude)
+	}
+
+	wg.Wait()
+
+	return contains
+}
+
 func (wof WOFFeature) GeomToPolygons() []*WOFPolygon {
 
 	body := wof.Body()
@@ -294,13 +322,17 @@ func (wof WOFFeature) DumpMultiPolygon(coordinates []interface{}) []*WOFPolygon 
 
 		polys := ipolys.([]interface{})
 
-		for _, ipoly := range polys {
+		polygon := wof.DumpPolygon(polys)
+		polygons = append(polygons, polygon)
 
-			poly := ipoly.([]interface{})
-			polygon := wof.DumpPolygon(poly)
-			polygons = append(polygons, polygon)
-		}
+		/*
+			for _, ipoly := range polys {
 
+				poly := ipoly.([]interface{})
+				polygon := wof.DumpPolygon(poly)
+				polygons = append(polygons, polygon)
+			}
+		*/
 	}
 
 	return polygons
