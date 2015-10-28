@@ -42,6 +42,17 @@ type WOFPolygon struct {
 	InteriorRings []geo.Polygon
 }
 
+func (p *WOFPolygon) CountPoints() int {
+
+     count := len(p.OuterRing.Points())
+
+     for _, r := range p.InteriorRings {
+     	 count += len(r.Points())
+     }
+
+     return count
+}
+
 func (p *WOFPolygon) Contains(latitude float64, longitude float64) bool {
 
 	pt := geo.NewPoint(latitude, longitude)

@@ -19,3 +19,6 @@ dump:	self
 
 pip:	self
 	go build -o bin/pip bin/pip.go
+
+test-pip: pip
+	  ./bin/pip /usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson /usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson

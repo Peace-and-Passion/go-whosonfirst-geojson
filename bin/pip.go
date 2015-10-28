@@ -77,7 +77,7 @@ func main() {
 
 		for i, poly := range polygons {
 
-			fmt.Printf("%s #%d has %d interior rings\n", path, (i + 1), len(poly.InteriorRings))
+			fmt.Printf("%s #%d has %d interior rings and a total of %d points\n", path, (i + 1), len(poly.InteriorRings), poly.CountPoints())
 
 			c := poly.Contains(lat, lon)
 
