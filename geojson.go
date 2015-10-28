@@ -89,7 +89,7 @@ func (sp WOFSpatial) Bounds() *rtreego.Rect {
 }
 
 type WOFFeature struct {
-	Raw    []byte
+	// Raw    []byte
 	Parsed *gabs.Container
 }
 
@@ -421,7 +421,7 @@ func UnmarshalFeature(raw []byte) (*WOFFeature, error) {
 	}
 
 	rsp := WOFFeature{
-		Raw:    raw,
+		// Raw:    raw,
 		Parsed: parsed,
 	}
 
