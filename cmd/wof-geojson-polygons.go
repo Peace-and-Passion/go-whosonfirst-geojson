@@ -19,9 +19,11 @@ func main() {
 			panic(parse_err)
 		}
 
-		sp, _ := f.EnSpatialize()
-		fmt.Printf("%v\n", sp)
-		fmt.Printf("%d\n", sp.Id)
+		polys := f.GeomToPolygons()
+
+		for _, p := range polys {
+			fmt.Printf("%d points\n", len(p.OuterRing.Points()))
+		}
 	}
 
 }

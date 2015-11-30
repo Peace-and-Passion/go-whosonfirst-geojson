@@ -14,11 +14,8 @@ fmt:
 	go fmt bin/*.go
 	go fmt *.go
 
-dump:	self
-	go build -o bin/dump bin/dump.go
-
-pip:	self
-	go build -o bin/pip bin/pip.go
-
-test-pip: pip
-	  ./bin/pip /usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson /usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson
+bin:	self
+	go build -o bin/wof-geojson-contains cmd/wof-geojson-contains.go
+	go build -o bin/wof-geojson-dump cmd/wof-geojson-dump.go
+	go build -o bin/wof-geojson-enspatialize cmd/wof-geojson-enspatialize.go
+	go build -o bin/wof-geojson-polygons cmd/wof-geojson-polygons.go

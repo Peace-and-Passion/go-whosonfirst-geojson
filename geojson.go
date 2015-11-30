@@ -44,13 +44,13 @@ type WOFPolygon struct {
 
 func (p *WOFPolygon) CountPoints() int {
 
-     count := len(p.OuterRing.Points())
+	count := len(p.OuterRing.Points())
 
-     for _, r := range p.InteriorRings {
-     	 count += len(r.Points())
-     }
+	for _, r := range p.InteriorRings {
+		count += len(r.Points())
+	}
 
-     return count
+	return count
 }
 
 func (p *WOFPolygon) Contains(latitude float64, longitude float64) bool {
@@ -244,22 +244,6 @@ func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 	name := wof.WOFName()
 	placetype := wof.WOFPlacetype()
 
-	return wof.enspatialize(id, name, placetype)
-}
-
-/*
-func (wof WOFFeature) EnSpatialize(path_id string, path_name string, path_placetype string) (*WOFSpatial, error) {
-
-	id := wof.Id(path_id)
-	name := wof.Name(path_name)
-	placetype := wof.Placetype(path_placetype)
-
-	return wof.enspatialize(id, name, placetype)
-}
-*/
-
-func (wof WOFFeature) enspatialize(id int, name string, placetype string) (*WOFSpatial, error) {
-
 	body := wof.Body()
 
 	var swlon float64
@@ -292,6 +276,61 @@ func (wof WOFFeature) enspatialize(id int, name string, placetype string) (*WOFS
 	}
 
 	return &WOFSpatial{rect, id, name, placetype}, nil
+}
+
+func (wof WOFFeature) EnSpatializeGeom() ([]*WOFSpatial, error) {
+
+	id := wof.WOFId()
+	name := wof.WOFName()
+	placetype := wof.WOFPlacetype()
+
+	spatial := make([]*WOFSpatial, 0)
+	polygons := wof.GeomToPolygons()
+
+	for _, poly := range polygons {
+
+		swlat := 0.0
+		swlon := 0.0
+		nelat := 0.0
+		nelon := 0.0
+
+		for _, pt := range poly.OuterRing.Points() {
+
+			lat := pt.Lat()
+			lon := pt.Lng()
+
+			if lat < swlat {
+				swlat = lat
+			} else if lat > nelat {
+				nelat = lat
+			} else {
+				// pass
+			}
+
+			if lon < swlon {
+				swlon = lon
+			} else if lon > nelon {
+				nelon = lon
+			} else {
+				// pass
+			}
+		}
+
+		llat := nelat - swlat
+		llon := nelon - swlon
+
+		pt := rtreego.Point{swlon, swlat}
+		rect, err := rtreego.NewRect(pt, []float64{llon, llat})
+
+		if err != nil {
+			return nil, err
+		}
+
+		sp := WOFSpatial{rect, id, name, placetype}
+		spatial = append(spatial, &sp)
+	}
+
+	return spatial, nil
 }
 
 func (wof WOFFeature) Contains(latitude float64, longitude float64) bool {
@@ -363,15 +402,6 @@ func (wof WOFFeature) DumpMultiPolygon(coordinates []interface{}) []*WOFPolygon 
 
 		polygon := wof.DumpPolygon(polys)
 		polygons = append(polygons, polygon)
-
-		/*
-			for _, ipoly := range polys {
-
-				poly := ipoly.([]interface{})
-				polygon := wof.DumpPolygon(poly)
-				polygons = append(polygons, polygon)
-			}
-		*/
 	}
 
 	return polygons
