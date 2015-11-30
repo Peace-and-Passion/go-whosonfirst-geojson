@@ -35,6 +35,7 @@ type WOFSpatial struct {
 	Id        int
 	Name      string
 	Placetype string
+	Offset	  int	// used when calling EnSpatializeGeom in order to know which polygon we care about
 }
 
 type WOFPolygon struct {
@@ -275,7 +276,7 @@ func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 		return nil, err
 	}
 
-	return &WOFSpatial{rect, id, name, placetype}, nil
+	return &WOFSpatial{rect, id, name, placetype, -1}, nil
 }
 
 func (wof WOFFeature) EnSpatializeGeom() ([]*WOFSpatial, error) {
@@ -287,7 +288,7 @@ func (wof WOFFeature) EnSpatializeGeom() ([]*WOFSpatial, error) {
 	spatial := make([]*WOFSpatial, 0)
 	polygons := wof.GeomToPolygons()
 
-	for _, poly := range polygons {
+	for offset, poly := range polygons {
 
 		swlat := 0.0
 		swlon := 0.0
@@ -326,7 +327,7 @@ func (wof WOFFeature) EnSpatializeGeom() ([]*WOFSpatial, error) {
 			return nil, err
 		}
 
-		sp := WOFSpatial{rect, id, name, placetype}
+		sp := WOFSpatial{rect, id, name, placetype, offset}
 		spatial = append(spatial, &sp)
 	}
 
