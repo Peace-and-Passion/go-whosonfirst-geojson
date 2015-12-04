@@ -31,7 +31,7 @@ func main() {
 		fmt.Printf("%v\n", len(spg))
 
 		for _, s := range spg {
-		    fmt.Printf("%v\n", s)
+			fmt.Printf("%v\n", s)
 		}
 	}
 

@@ -35,7 +35,7 @@ type WOFSpatial struct {
 	Id        int
 	Name      string
 	Placetype string
-	Offset	  int	// used when calling EnSpatializeGeom in order to know which polygon we care about
+	Offset    int // used when calling EnSpatializeGeom in order to know which polygon we care about
 }
 
 type WOFPolygon struct {
@@ -266,8 +266,10 @@ func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 	llat := nelat - swlat
 	llon := nelon - swlon
 
-	// fmt.Printf("%f - %f = %f\n", nelat, swlat, llat)
-	// fmt.Printf("%f - %f = %f\n", nelon, swlon, llon)
+	/*
+		fmt.Printf("%f - %f = %f\n", nelat, swlat, llat)
+		fmt.Printf("%f - %f = %f\n", nelon, swlon, llon)
+	*/
 
 	pt := rtreego.Point{swlon, swlat}
 	rect, err := rtreego.NewRect(pt, []float64{llon, llat})
@@ -300,21 +302,23 @@ func (wof WOFFeature) EnSpatializeGeom() ([]*WOFSpatial, error) {
 			lat := pt.Lat()
 			lon := pt.Lng()
 
-			if lat < swlat {
+			if swlat == 0.0 || swlat > lat {
 				swlat = lat
-			} else if lat > nelat {
-				nelat = lat
-			} else {
-				// pass
 			}
 
-			if lon < swlon {
+			if swlon == 0.0 || swlon > lon {
 				swlon = lon
-			} else if lon > nelon {
-				nelon = lon
-			} else {
-				// pass
 			}
+
+			if nelat == 0.0 || nelat < lat {
+				nelat = lat
+			}
+
+			if nelon == 0.0 || nelon < lon {
+				nelon = lon
+			}
+
+			// fmt.Println(lat, lon, swlat, swlon, nelat, nelon)
 		}
 
 		llat := nelat - swlat
