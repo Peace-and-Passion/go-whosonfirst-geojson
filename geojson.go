@@ -1,6 +1,7 @@
 package geojson
 
 import (
+       "errors"
 	"fmt"
 	rtreego "github.com/dhconnelly/rtreego"
 	gabs "github.com/jeffail/gabs"
@@ -18,14 +19,6 @@ import (
   (only Polygons and MultiPolygons are supported at the moment)
 
 */
-
-type WOFError struct {
-	s string
-}
-
-func (e *WOFError) Error() string {
-	return e.s
-}
 
 // See also
 // https://github.com/dhconnelly/rtreego#storing-updating-and-deleting-objects
@@ -101,7 +94,6 @@ func (sp WOFSpatial) Bounds() *rtreego.Rect {
 }
 
 type WOFFeature struct {
-	// Raw    []byte
 	Parsed *gabs.Container
 }
 
@@ -113,26 +105,24 @@ func (wof WOFFeature) Dumps() string {
 	return wof.Parsed.String()
 }
 
-/*
-func (wof WOFFeature) Id(path string) int {
-
-	return wof.id(path)
-}
-*/
-
 func (wof WOFFeature) Id() int {
 
-	path := "id"
-	return wof.id(path)
+     	id, ok := wof.id("properties.wof:id")
+
+	if ok {
+	   return id
+	}
+
+	id, ok = wof.id("id")
+
+	if ok {
+	   return id
+	}
+
+	return -1
 }
 
-func (wof WOFFeature) WOFId() int {
-
-	path := "properties.wof:id"
-	return wof.id(path)
-}
-
-func (wof WOFFeature) id(path string) int {
+func (wof WOFFeature) id(path string) (int, bool) {
 
 	body := wof.Body()
 
@@ -175,51 +165,45 @@ func (wof WOFFeature) id(path string) int {
 		id = -1
 	}
 
-	return id
+	return id, ok
 }
 
-func (wof WOFFeature) Name(path string) string {
+func (wof WOFFeature) Name() string {
 
-	return wof.name(path)
-}
+     	name, ok := wof.name("properties.wof:name")
 
-func (wof WOFFeature) WOFName() string {
-
-	path := "properties.wof:name"
-	return wof.name(path)
-}
-
-func (wof WOFFeature) name(path string) string {
-
-	name, ok := wof.StringValue(path)
-
-	if !ok {
-		name = "A Place With No Name"
+	if ok {
+	   return name
 	}
 
-	return name
-}
+     	name, ok = wof.name("properties.name")
 
-func (wof WOFFeature) Placetype(path string) string {
-
-	return wof.placetype(path)
-}
-
-func (wof WOFFeature) WOFPlacetype() string {
-
-	path := "properties.wof:placetype"
-	return wof.placetype(path)
-}
-
-func (wof WOFFeature) placetype(path string) string {
-
-	placetype, ok := wof.StringValue(path)
-
-	if !ok {
-		placetype = "unknown"
+	if ok {
+	   return name
 	}
 
-	return placetype
+	return "a place with no name"
+}
+
+func (wof WOFFeature) name(path string) (string, bool) {
+
+	return wof.StringValue(path)
+}
+
+func (wof WOFFeature) Placetype() string {
+
+	pt, ok := wof.placetype("properties.wof:placetype")
+
+	if ok {
+	   return pt
+	}
+
+	return "here be dragons"
+}
+
+func (wof WOFFeature) placetype(path string) (string, bool) {
+
+	return wof.StringValue(path)
 }
 
 func (wof WOFFeature) StringProperty(prop string) (string, bool) {
@@ -241,9 +225,9 @@ func (wof WOFFeature) StringValue(path string) (string, bool) {
 
 func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 
-	id := wof.WOFId()
-	name := wof.WOFName()
-	placetype := wof.WOFPlacetype()
+	id := wof.Id()
+	name := wof.Name()
+	placetype := wof.Placetype()
 
 	body := wof.Body()
 
@@ -255,7 +239,7 @@ func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 	children, _ := body.S("bbox").Children()
 
 	if len(children) != 4 {
-		return nil, &WOFError{"weird and freaky bounding box"}
+		return nil, errors.New("weird and freaky bounding box")
 	}
 
 	swlon = children[0].Data().(float64)
@@ -283,9 +267,9 @@ func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 
 func (wof WOFFeature) EnSpatializeGeom() ([]*WOFSpatial, error) {
 
-	id := wof.WOFId()
-	name := wof.WOFName()
-	placetype := wof.WOFPlacetype()
+	id := wof.Id()
+	name := wof.Name()
+	placetype := wof.Placetype()
 
 	spatial := make([]*WOFSpatial, 0)
 	polygons := wof.GeomToPolygons()
