@@ -23,6 +23,9 @@ import (
 // See also
 // https://github.com/dhconnelly/rtreego#storing-updating-and-deleting-objects
 
+// sudo make me an interface 
+// (201251207/thisisaaronland)
+
 type WOFSpatial struct {
 	bounds    *rtreego.Rect
 	Id        int
@@ -30,6 +33,9 @@ type WOFSpatial struct {
 	Placetype string
 	Offset    int // used when calling EnSpatializeGeom in order to know which polygon we care about
 }
+
+// sudo make me an interface 
+// (201251207/thisisaaronland)
 
 type WOFPolygon struct {
 	OuterRing     geo.Polygon
@@ -92,6 +98,9 @@ func (p *WOFPolygon) Contains(latitude float64, longitude float64) bool {
 func (sp WOFSpatial) Bounds() *rtreego.Rect {
 	return sp.bounds
 }
+
+// sudo make me an interface 
+// (201251207/thisisaaronland)
 
 type WOFFeature struct {
 	Parsed *gabs.Container
@@ -223,6 +232,9 @@ func (wof WOFFeature) StringValue(path string) (string, bool) {
 	return value, ok
 }
 
+// sudo make me a package function and accept an interface
+// (20151207/thisisaaronland)
+
 func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 
 	id := wof.Id()
@@ -264,6 +276,9 @@ func (wof WOFFeature) EnSpatialize() (*WOFSpatial, error) {
 
 	return &WOFSpatial{rect, id, name, placetype, -1}, nil
 }
+
+// sudo make me a package function and accept an interface
+// (20151207/thisisaaronland)
 
 func (wof WOFFeature) EnSpatializeGeom() ([]*WOFSpatial, error) {
 
@@ -347,7 +362,9 @@ func (wof WOFFeature) Contains(latitude float64, longitude float64) bool {
 	wg.Wait()
 
 	return contains
-}
+
+// sudo make me a package function and accept an interface... maybe?
+// (20151207/thisisaaronland)}
 
 func (wof WOFFeature) GeomToPolygons() []*WOFPolygon {
 
@@ -381,6 +398,9 @@ func (wof WOFFeature) GeomToPolygons() []*WOFPolygon {
 	return polygons
 }
 
+// sudo these don't need to be public methods
+// (20151207/thisisaaronland)
+
 func (wof WOFFeature) DumpMultiPolygon(coordinates []interface{}) []*WOFPolygon {
 
 	polygons := make([]*WOFPolygon, 0)
@@ -395,6 +415,9 @@ func (wof WOFFeature) DumpMultiPolygon(coordinates []interface{}) []*WOFPolygon 
 
 	return polygons
 }
+
+// sudo these don't need to be public methods
+// (20151207/thisisaaronland)
 
 func (wof WOFFeature) DumpPolygon(coordinates []interface{}) *WOFPolygon {
 
@@ -412,6 +435,9 @@ func (wof WOFFeature) DumpPolygon(coordinates []interface{}) *WOFPolygon {
 		InteriorRings: polygons[1:],
 	}
 }
+
+// sudo these don't need to be public methods
+// (20151207/thisisaaronland)
 
 func (wof WOFFeature) DumpCoords(poly []interface{}) geo.Polygon {
 
