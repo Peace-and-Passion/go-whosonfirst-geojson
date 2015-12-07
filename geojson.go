@@ -1,7 +1,7 @@
 package geojson
 
 import (
-       "errors"
+	"errors"
 	"fmt"
 	rtreego "github.com/dhconnelly/rtreego"
 	gabs "github.com/jeffail/gabs"
@@ -23,7 +23,7 @@ import (
 // See also
 // https://github.com/dhconnelly/rtreego#storing-updating-and-deleting-objects
 
-// sudo make me an interface 
+// sudo make me an interface
 // (201251207/thisisaaronland)
 
 type WOFSpatial struct {
@@ -34,7 +34,7 @@ type WOFSpatial struct {
 	Offset    int // used when calling EnSpatializeGeom in order to know which polygon we care about
 }
 
-// sudo make me an interface 
+// sudo make me an interface
 // (201251207/thisisaaronland)
 
 type WOFPolygon struct {
@@ -99,7 +99,7 @@ func (sp WOFSpatial) Bounds() *rtreego.Rect {
 	return sp.bounds
 }
 
-// sudo make me an interface 
+// sudo make me an interface
 // (201251207/thisisaaronland)
 
 type WOFFeature struct {
@@ -116,16 +116,22 @@ func (wof WOFFeature) Dumps() string {
 
 func (wof WOFFeature) Id() int {
 
-     	id, ok := wof.id("properties.wof:id")
+	id, ok := wof.id("properties.wof:id")
 
 	if ok {
-	   return id
+		return id
+	}
+
+	id, ok = wof.id("properties.id")
+
+	if ok {
+		return id
 	}
 
 	id, ok = wof.id("id")
 
 	if ok {
-	   return id
+		return id
 	}
 
 	return -1
@@ -179,16 +185,16 @@ func (wof WOFFeature) id(path string) (int, bool) {
 
 func (wof WOFFeature) Name() string {
 
-     	name, ok := wof.name("properties.wof:name")
+	name, ok := wof.name("properties.wof:name")
 
 	if ok {
-	   return name
+		return name
 	}
 
-     	name, ok = wof.name("properties.name")
+	name, ok = wof.name("properties.name")
 
 	if ok {
-	   return name
+		return name
 	}
 
 	return "a place with no name"
@@ -204,7 +210,13 @@ func (wof WOFFeature) Placetype() string {
 	pt, ok := wof.placetype("properties.wof:placetype")
 
 	if ok {
-	   return pt
+		return pt
+	}
+
+	pt, ok = wof.placetype("properties.placetype")
+
+	if ok {
+		return pt
 	}
 
 	return "here be dragons"
@@ -362,6 +374,7 @@ func (wof WOFFeature) Contains(latitude float64, longitude float64) bool {
 	wg.Wait()
 
 	return contains
+}
 
 // sudo make me a package function and accept an interface... maybe?
 // (20151207/thisisaaronland)}
@@ -457,6 +470,8 @@ func (wof WOFFeature) DumpCoords(poly []interface{}) geo.Polygon {
 	return polygon
 }
 
+// see below (20151207/thisisaaronland)
+
 func UnmarshalFile(path string) (*WOFFeature, error) {
 
 	body, read_err := ioutil.ReadFile(path)
@@ -468,6 +483,90 @@ func UnmarshalFile(path string) (*WOFFeature, error) {
 	return UnmarshalFeature(body)
 }
 
+// this is disabled for now even though it (or something like it) is
+// probably the new new; note the way we end up parsing the JSON body
+// twice... we should not do that (20151207/thisisaaronland)
+
+/*
+func UnmarshalFileMulti(path string) ([]*WOFFeature, error) {
+
+	body, read_err := ioutil.ReadFile(path)
+
+	if read_err != nil {
+		return nil, read_err
+	}
+
+	parsed, parse_err := gabs.ParseJSON(body)
+
+	if parse_err != nil {
+		return nil, parse_err
+	}
+
+	isa, ok := parsed.Path("type").Data().(string)
+
+	if !ok {
+		return nil, errors.New("failed to determine type")
+	}
+
+	features := make([]*WOFFeature, 0)
+
+	if isa == "Feature" {
+
+		f, err := UnmarshalFeature(body)
+
+		if err != nil {
+			return nil, err
+		}
+
+		features = append(features, f)
+
+	} else if isa == "FeatureCollection" {
+
+		collection, err := UnmarshalFeatureCollection(body)
+
+		if err != nil {
+			return nil, err
+		}
+
+		features = collection
+	} else {
+		return nil, errors.New("unknown type")
+	}
+
+	return features, nil
+}
+*/
+
+// see above inre passing bytes or an already parsed thing-y
+// (20151207/thisisaaronland)
+
+func UnmarshalFeatureCollection(raw []byte) ([]*WOFFeature, error) {
+
+	parsed, parse_err := gabs.ParseJSON(raw)
+
+	if parse_err != nil {
+		return nil, parse_err
+	}
+
+	children, _ := parsed.S("features").Children()
+
+	collection := make([]*WOFFeature, 0)
+
+	for _, child := range children {
+
+		f := WOFFeature{
+			Parsed: child,
+		}
+
+		collection = append(collection, &f)
+	}
+
+	return collection, nil
+}
+
+// see above inre passing bytes or an already parsed thing-y
+// (20151207/thisisaaronland)
+
 func UnmarshalFeature(raw []byte) (*WOFFeature, error) {
 
 	parsed, parse_err := gabs.ParseJSON(raw)
@@ -477,7 +576,6 @@ func UnmarshalFeature(raw []byte) (*WOFFeature, error) {
 	}
 
 	rsp := WOFFeature{
-		// Raw:    raw,
 		Parsed: parsed,
 	}
 
