@@ -2,6 +2,21 @@
 
 Go tools for working with Who's On First documents
 
+## Important
+
+This package not been officially deprecated yet but it will be as soon as the [go-whosonfirst-geojson-v2](https://github.com/whosonfirst/go-whosonfirst-geojson-v2) package is complete. Until then only immediate bug fixes will be addressed. No additional features will be added to this package.
+
+## Install
+
+You will need to have both `Go` (specifically a version of Go more recent than 1.6 so let's just assume you need [Go 1.8](https://golang.org/dl/) or higher) and the `make` programs installed on your computer. Assuming you do just type:
+
+```
+make bin
+```
+
+All of this package's dependencies are bundled with the code in the `vendor` directory.
+
+
 ## Usage
 
 ```
