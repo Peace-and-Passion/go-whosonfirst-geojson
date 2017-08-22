@@ -3,64 +3,47 @@ package main
 import (
 	"flag"
 	"fmt"
-	geojson "github.com/whosonfirst/go-whosonfirst-geojson"
+	"github.com/whosonfirst/go-whosonfirst-geojson"
+	"log"
+	"strconv"
+	"strings"
 )
 
 func main() {
 
-	/*
-
-			# ASSUMING
-		        # lat := 45.523668
-		        # lon := -73.600159
-
-			# PLAIN VANILLA POLYGON
-
-			$> ./bin/pip /usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson /usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson
-			/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson has this many polygons: 1
-			/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson #1 has 3 interior rings
-			/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson #1 contains point false
-			/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson contains point: false
-			/usr/local/mapzen/whosonfirst-data/data/404/529/181/404529181.geojson f.Contains() point: false
-			---
-			/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson has this many polygons: 1
-			/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson #1 has 0 interior rings
-			/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson #1 contains point true
-			/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson contains point: true
-			/usr/local/mapzen/whosonfirst-data/data/857/848/31/85784831.geojson f.Contains() point: true
-			---
-
-			# MULTI POLYGON
-
-			$> ./bin/pip /usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson has this many polygons: 8
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #1 has 0 interior rings
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #1 contains point false
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #2 has 0 interior rings
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #2 contains point false
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #3 has 0 interior rings
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #3 contains point false
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #4 has 0 interior rings
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #4 contains point true
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #5 has 0 interior rings
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #5 contains point false
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #6 has 0 interior rings
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #6 contains point false
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #7 has 0 interior rings
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #7 contains point false
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #8 has 0 interior rings
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson #8 contains point false
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson contains point: true
-			/usr/local/mapzen/whosonfirst-data/data/136/251/273/136251273.geojson f.Contains() point: true
-			---
-
-	*/
+	var lat = flag.Float64("latitude", 0.0, "")
+	var lon = flag.Float64("longitude", 0.0, "")
+	var point = flag.String("point", "", "")
 
 	flag.Parse()
 	args := flag.Args()
 
-	lat := 45.523668
-	lon := -73.600159
+	if *point != "" {
+
+		parts := strings.Split(*point, ",")
+
+		if len(parts) != 2 {
+			log.Fatal("Can not parse point")
+		}
+
+		str_lat := strings.Trim(parts[0], " ")
+		str_lon := strings.Trim(parts[1], " ")
+
+		fl_lat, err := strconv.ParseFloat(str_lat, 64)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fl_lon, err := strconv.ParseFloat(str_lon, 64)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		*lat = fl_lat
+		*lon = fl_lon
+	}
 
 	for _, path := range args {
 
@@ -79,7 +62,7 @@ func main() {
 
 			fmt.Printf("%s #%d has %d interior rings and a total of %d points\n", path, (i + 1), len(poly.InteriorRings), poly.CountPoints())
 
-			c := poly.Contains(lat, lon)
+			c := poly.Contains(*lat, *lon)
 
 			fmt.Printf("%s #%d contains point %t\n", path, (i + 1), c)
 
@@ -90,7 +73,7 @@ func main() {
 
 		fmt.Printf("%s contains point: %t\n", path, contains)
 
-		fmt.Printf("%s f.Contains() point: %t\n", path, f.Contains(lat, lon))
+		fmt.Printf("%s f.Contains() point: %t\n", path, f.Contains(*lat, *lon))
 		fmt.Println("---")
 	}
 
